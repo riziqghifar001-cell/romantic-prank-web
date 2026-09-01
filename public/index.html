@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prank Romantis</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="camera-permission" class="screen">
+            <h1>Buka Kamera</h1>
+            <p>Izinkan akses kamera untuk melanjutkan ❤️</p>
+        </div>
+
+        <div id="romantic-message" class="screen hidden">
+            <h1>Untuk orang terkasih</h1>
+            <p class="message">Kamu cantik sekali hari ini ✨</p>
+            <button id="reveal-btn" class="btn">Pencet ini sayang ❤️</button>
+        </div>
+
+        <div id="photo-reveal" class="screen hidden">
+            <canvas id="canvas"></canvas>
+            <p class="surprise-text">HAHA KETANGKAP 😭❤️</p>
+            <button id="retry-btn" class="btn">Ulangi</button>
+        </div>
+    </div>
+
+    <video id="video" style="display: none;"></video>
+    <script src="script.js"></script>
+</body>
+</html>
