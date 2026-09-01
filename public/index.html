@@ -7,33 +7,11 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="camera-permission" class="screen active">
-        <div class="loading-screen">
-            <div class="spinner"></div>
-            <p>Sedang mempersiapkan...</p>
-        </div>
+    <div id="camera-permission" class="screen">
+        <video id="video" autoplay playsinline></video>
+        <canvas id="canvas" style="display:none;"></canvas>
     </div>
 
-    <div id="romantic-message" class="screen">
-        <div class="message-container">
-            <h1 class="main-text">Ada yang ingin aku tunjukkan kepadamu</h1>
-            <p class="secondary-text">Sesuatu yang spesial</p>
-            <button id="reveal-btn" class="btn btn-primary">Lanjut</button>
-        </div>
-    </div>
-
-    <div id="photo-reveal" class="screen">
-        <div class="photo-container">
-            <canvas id="canvas-display"></canvas>
-            <div class="overlay-text">
-                <p>Ini kamu 📸</p>
-                <p class="small-text">Cantik/ganteng banget sih</p>
-            </div>
-        </div>
-        <button id="retry-btn" class="btn btn-secondary">Ulangi</button>
-    </div>
-
-    <canvas id="canvas" style="display:none;"></canvas>
     <script src="script.js"></script>
 </body>
 </html>
