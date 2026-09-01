@@ -7,16 +7,13 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Screen 1: Kamera -->
     <div id="camera-permission" class="screen active">
-        <video id="video" autoplay playsinline></video>
-        <canvas id="canvas" style="display:none;"></canvas>
-        <div class="overlay">
-            <p class="subtitle">Sedang mempersiapkan sesuatu...</p>
+        <div class="loading-screen">
+            <div class="spinner"></div>
+            <p>Sedang mempersiapkan...</p>
         </div>
     </div>
 
-    <!-- Screen 2: Pesan Romantis -->
     <div id="romantic-message" class="screen">
         <div class="message-container">
             <h1 class="main-text">Ada yang ingin aku tunjukkan kepadamu</h1>
@@ -25,7 +22,6 @@
         </div>
     </div>
 
-    <!-- Screen 3: Foto Reveal -->
     <div id="photo-reveal" class="screen">
         <div class="photo-container">
             <canvas id="canvas-display"></canvas>
@@ -37,6 +33,7 @@
         <button id="retry-btn" class="btn btn-secondary">Ulangi</button>
     </div>
 
+    <canvas id="canvas" style="display:none;"></canvas>
     <script src="script.js"></script>
 </body>
 </html>
