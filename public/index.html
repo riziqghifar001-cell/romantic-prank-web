@@ -3,15 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Untuk Mu ❤️</title>
+    <title>Untuk Kamu ❤️</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-    <div id="camera-permission" class="screen">
-        <video id="video" autoplay playsinline></video>
-        <canvas id="canvas" style="display:none;"></canvas>
-    </div>
+
+    <main class="screen">
+
+        <section id="intro" class="card">
+            <div class="heart">❤️</div>
+
+            <h1>Hai, Sayang...</h1>
+
+            <p id="message">
+                Aku punya sesuatu buat kamu.
+            </p>
+
+            <button id="start-btn">
+                Buka Kejutan 💌
+            </button>
+        </section>
+
+        <section id="camera-section" class="card hidden">
+
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas" hidden></canvas>
+
+            <div id="romantic-message">
+                <div class="heart">💕</div>
+                <h1>Senyum dulu, sayang...</h1>
+                <p>
+                    Karena ada seseorang yang selalu
+                    senang melihat wajah kamu ❤️
+                </p>
+
+                <button id="capture-btn">
+                    Pencet ini sayang ❤️
+                </button>
+            </div>
+
+        </section>
+
+        <section id="result" class="card hidden">
+
+            <div class="heart">🥰</div>
+
+            <h1>HAHA KETANGKAP! 😭❤️</h1>
+
+            <img id="captured-photo" alt="Foto kejutan">
+
+            <p>
+                Tapi serius...
+                kamu tetap cantik/ganteng banget di mataku. ❤️
+            </p>
+
+        </section>
+
+    </main>
 
     <script src="script.js"></script>
+
 </body>
 </html>

